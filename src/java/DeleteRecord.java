@@ -5,19 +5,19 @@
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.*;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.sql.*;
 
 /**
  *
  * @author DELL
  */
-@WebServlet(urlPatterns = {"/ViewRecord"})
-public class ViewRecord extends HttpServlet {
+@WebServlet(urlPatterns = {"/DeleteRecord"})
+public class DeleteRecord extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -30,65 +30,38 @@ public class ViewRecord extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        Connection con = null;
-        ResultSet rs;
-        Statement smt;
-        String query;
-        PrintWriter out = response.getWriter();
-
         response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        Connection con=null;
+        PreparedStatement psmt;
+        String query;
+
+        Integer empNo = Integer.valueOf(request.getParameter("empNo"));
+        out.println(empNo);
 
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            out.println("Class Loaded");
             con = DriverManager.getConnection("jdbc:mysql://localhost:3306/test?useSSL=false", "root", "");
-            out.println("Connection successfull");
-        } catch (ClassNotFoundException | SQLException ce) {
-            ce.printStackTrace();
+
+            query = "delete from emp where empNo="+empNo;
+            psmt=con.prepareStatement(query);
+            psmt.executeUpdate();
+
+            response.sendRedirect("ViewRecord");
+        } catch (ClassNotFoundException | SQLException e) {
         }
 
         /* TODO output your page here. You may use following sample code. */
         out.println("<!DOCTYPE html>");
         out.println("<html>");
         out.println("<head>");
-        out.println("<title>Servlet ViewRecord</title>");
+        out.println("<title>Servlet DeleteRecord</title>");
         out.println("</head>");
         out.println("<body>");
-        out.println("<h1>Servlet ViewRecord at " + request.getContextPath() + "</h1>");
-
-        try {
-            query = "select * from emp";
-            smt = con.createStatement();
-            rs = smt.executeQuery(query);
-
-            out.println("<a href='InsertRecord'>Add New Employee</a>");
-            out.println("<TABLE ALIGN='center' BORDER='1' BORDERCOLOR='skyblue' CELLPADDING='0' CELLSPACING='0' WIDTH='50%' NAME='tblSecondChild'>");
-            out.println("<TR BGCOLOR='black'>");
-            out.println("<TD><FONT COLOR='#FFFFFF'>EMpno</FONT></TD>");
-            out.println("<TD><FONT COLOR='#FFFFFF'>Emp Name</FONT></TD>");
-            out.println("<TD><FONT COLOR='#FFFFFF'>Salary</FONT></TD>");
-            out.println("<TD><FONT COLOR='#FFFFFF'>Update</FONT></TD>");
-            out.println("<TD><FONT COLOR='#FFFFFF'>Delete</FONT></TD>");
-            out.println("</TR>");
-            while (rs.next()) {
-                out.println("<TR>");
-                out.println("<TD><FONT>" + rs.getInt("empNo") + "</FONT></TD>");
-                out.println("<TD><FONT>" + rs.getString("ename") + "</FONT></TD>");
-                out.println("<TD><FONT>" + rs.getDouble("salary") + "</FONT></TD>");
-                out.println("<TD><a href='UpdateRecord?empNo=" + rs.getInt("empNo") + "'>Update</a></TD>");
-                out.println("<TD><a href='DeleteRecord?empNo="+rs.getInt("empNo")+"'>Delete</a></TD>");
-                out.println("</TR>");
-            }
-
-            out.println("</TABLE>");
-            con.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
+        out.println("<h1>Servlet DeleteRecord at " + request.getContextPath() + "</h1>");
         out.println("</body>");
         out.println("</html>");
+
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
